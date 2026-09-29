@@ -23,8 +23,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
     Route::get('/registro', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/registro', [AuthController::class, 'register'])->name('register.store');
+
+    // Recuperación de contraseña
     Route::get('/recuperar-contrasena', [AuthController::class, 'showForgot'])->name('password.request');
     Route::post('/recuperar-contrasena', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/restablecer-contrasena/{token}', [AuthController::class, 'showReset'])->name('password.reset');
+    Route::post('/restablecer-contrasena', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
