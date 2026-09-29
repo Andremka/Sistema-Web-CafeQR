@@ -5,15 +5,12 @@
     <h2>Recuperar contraseña</h2>
     <p style="color:var(--ink-500);">Te enviaremos un enlace para restablecerla a tu correo institucional</p>
 
-    @if ($errors->any())
-        <div class="alert alert-error">{{ $errors->first() }}</div>
-    @endif
-
     <form action="{{ route('password.email') }}" method="POST">
         @csrf
         <div class="field">
             <label for="email">Correo institucional</label>
-            <input type="text" id="email" name="email" placeholder="usuario@univalle.edu">
+            <input type="email" id="email" name="email" value="{{ old('email') }}"
+                   placeholder="usuario@univalle.edu" autocomplete="email" required autofocus>
         </div>
         <button type="submit" class="btn">Enviar enlace de recuperación</button>
     </form>
