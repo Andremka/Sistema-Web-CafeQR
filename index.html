@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CafeQR — Sistema web de pedidos anticipados y recojo mediante código QR para cafeterías universitarias.">
+<title>CafeQR | Pedidos anticipados y recojo con código QR</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app-web">
+
+  <!-- ============ HEADER ============ -->
+  <header class="header">
+    <div class="logo">
+      <svg class="logo-mark" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="1" y="1" width="10" height="2.4" fill="#C9A15A"/>
+        <rect x="1" y="1" width="2.4" height="10" fill="#C9A15A"/>
+        <rect x="23" y="1" width="10" height="2.4" fill="#C9A15A"/>
+        <rect x="31.6" y="1" width="2.4" height="10" fill="#C9A15A"/>
+        <rect x="1" y="23" width="10" height="2.4" fill="#C9A15A"/>
+        <rect x="1" y="23" width="2.4" height="10" fill="#C9A15A"/>
+        <circle cx="17" cy="17" r="8" fill="#C9A15A"/>
+        <path d="M13 15.5c0-1.5 1.2-2.5 2.5-3 .8-.3 1.2-.9.9-1.7" stroke="#5C1730" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="17" cy="19" rx="4.6" ry="3" fill="#5C1730"/>
+      </svg>
+      CafeQR
+    </div>
+
+    <nav class="menu-top" id="navLinks" style="display:none;" aria-label="Navegación principal">
+      <button class="nav-btn student-only" type="button" data-action="goto" data-target="screen-menu">Menú</button>
+      <button class="nav-btn student-only" type="button" data-action="goto" data-target="screen-pay">Pago</button>
+      <button class="nav-btn student-only" type="button" data-action="goto" data-target="screen-tracking">Mi Pedido</button>
+      <button class="nav-btn admin-only" type="button" data-action="goto" data-target="screen-admin">Panel Admin</button>
+
+      <div class="user-menu-wrapper">
+        <button class="user-tag" type="button" data-action="toggle-user-menu" aria-haspopup="true">
+          <span class="user-tag-avatar">U</span>
+          <span id="userNameDisplay">Usuario</span>
+          <span class="caret" aria-hidden="true">▾</span>
+        </button>
+
+        <div class="dropdown-menu" id="userDropdown">
+          <div class="dropdown-header">
+            <div class="avatar-circle">U</div>
+            <div class="dropdown-user-info">
+              <strong id="userNameDisplay2">Usuario</strong>
+              <p class="dropdown-email" id="userEmailDisplay">usuario@univalle.edu</p>
+            </div>
+          </div>
+
+          <div class="dropdown-divider student-only"></div>
+
+          <div class="dropdown-cupos student-only">
+            <span>Cupo disponible</span>
+            <strong id="cupoBalance">Bs 50</strong>
+          </div>
+          <div class="cupo-redeem student-only">
+            <label class="sr-only" for="cupoCode">Código de cupón</label>
+            <input type="text" id="cupoCode" placeholder="Código de cupón" maxlength="14">
+            <button type="button" data-action="redeem-cupo">Canjear</button>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item student-only" type="button" data-action="goto-orders">📦 Mis pedidos</button>
+          <button class="dropdown-item logout-item" type="button" data-action="logout">🚪 Cerrar sesión</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ============ LOGIN ============ -->
+  <section class="screen active" id="screen-login">
+    <div class="login-card">
+      <h2>Iniciar sesión</h2>
+      <p class="subtitle">Accede con tu correo institucional</p>
+
+      <div class="field">
+        <label for="userInput">Correo institucional</label>
+        <input type="text" id="userInput" placeholder="usuario@univalle.edu" autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="passInput">Contraseña</label>
+        <input type="password" id="passInput" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="btn-primary" type="button" data-action="login">Ingresar</button>
+      <p class="error-text" id="loginError" role="alert" style="display:none;"></p>
+
+      <p class="switch-auth">
+        <button class="btn-link" type="button" data-action="goto" data-target="screen-forgot">¿Olvidaste tu contraseña?</button>
+      </p>
+      <p class="switch-auth">¿No tienes cuenta?
+        <button class="btn-link" type="button" data-action="goto-register">Regístrate aquí</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ RECUPERAR CONTRASEÑA ============ -->
+  <section class="screen" id="screen-forgot">
+    <div class="login-card">
+      <h2>Recuperar contraseña</h2>
+      <p class="subtitle">Te enviaremos un enlace para restablecerla a tu correo institucional</p>
+
+      <div class="field">
+        <label for="forgotEmail">Correo institucional</label>
+        <input type="text" id="forgotEmail" placeholder="usuario@univalle.edu" autocomplete="username">
+      </div>
+
+      <button class="btn-primary" type="button" data-action="send-reset">Enviar enlace de recuperación</button>
+      <p class="error-text" id="forgotError" role="alert" style="display:none;"></p>
+
+      <p class="switch-auth">
+        <button class="btn-link" type="button" data-action="goto" data-target="screen-login">← Volver a iniciar sesión</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ REGISTRO ============ -->
+  <section class="screen" id="screen-register">
+    <div class="login-card">
+      <h2>Crear cuenta</h2>
+      <p class="subtitle">Regístrate con tu correo institucional</p>
+
+      <div class="field">
+        <label for="regName">Nombre completo</label>
+        <input type="text" id="regName" placeholder="Nombre y apellido" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="regEmail">Correo institucional</label>
+        <input type="text" id="regEmail" placeholder="usuario@univalle.edu" autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="regPass">Contraseña</label>
+        <input type="password" id="regPass" placeholder="••••••••" autocomplete="new-password">
+      </div>
+
+      <button class="btn-primary" type="button" data-action="register">Crear cuenta</button>
+      <p class="error-text" id="registerError" role="alert" style="display:none;"></p>
+
+      <p class="switch-auth">¿Ya tienes cuenta?
+        <button class="btn-link" type="button" data-action="goto" data-target="screen-login">Inicia sesión</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ MENÚ + CARRITO ============ -->
+  <section class="screen" id="screen-menu">
+    <div class="screen-head">
+      <div>
+        <p class="eyebrow">Cafetería universitaria</p>
+        <h2>Menú del día</h2>
+      </div>
+      <p>Elige tus productos y págalos con QR antes de pasar a recogerlos.</p>
+    </div>
+
+    <div class="menu-search">
+      <span class="menu-search-icon" aria-hidden="true">🔍</span>
+      <label class="sr-only" for="productSearch">Buscar producto</label>
+      <input type="text" id="productSearch" placeholder="Buscar un producto… (ej. café, sandwich, combo)">
+    </div>
+
+    <div class="layout-2col">
+      <div class="col-products">
+        <!-- Las tarjetas de producto se generan desde PRODUCTS en js/app.js -->
+        <div id="productGrid"></div>
+        <p class="empty-cart" id="productEmptyState" hidden>No encontramos productos con ese nombre.</p>
+      </div>
+
+      <div class="col-cart">
+        <h3>🛒 Tu pedido <span id="cartCount" class="cart-count"></span></h3>
+        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-total">
+          <span>Total</span>
+          <span>Bs <span id="total">0</span></span>
+        </div>
+        <button class="btn-primary" type="button" id="goToPayBtn" data-action="goto-pay" disabled>Continuar al pago</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGO / QR ============ -->
+  <section class="screen" id="screen-pay">
+    <button class="back-link" type="button" data-action="goto" data-target="screen-menu">← Volver al menú</button>
+    <div class="pay-card">
+      <h2>Pago con código QR</h2>
+      <p class="subtitle">Escanea el código con tu app bancaria o billetera móvil</p>
+
+      <div class="pay-account" id="payAccount">
+        <div class="pay-account-row">
+          <div>
+            <span class="pay-account-label">Cuenta que recibe el pago</span>
+            <p class="pay-account-value" id="payAccountSummary">—</p>
+          </div>
+          <button class="btn-link" type="button" data-action="toggle-account-edit">Editar</button>
+        </div>
+        <div class="pay-account-edit" id="payAccountEdit" hidden>
+          <div class="field">
+            <label for="accBanco">Banco</label>
+            <input type="text" id="accBanco" placeholder="Nombre del banco">
+          </div>
+          <div class="field">
+            <label for="accTitular">Titular de la cuenta</label>
+            <input type="text" id="accTitular" placeholder="A nombre de quién está la cuenta">
+          </div>
+          <div class="field">
+            <label for="accNumero">Número de cuenta</label>
+            <input type="text" id="accNumero" placeholder="Número de cuenta">
+          </div>
+          <button class="btn-primary" type="button" data-action="save-account">Guardar cuenta</button>
+        </div>
+      </div>
+
+      <div class="qr-box" id="qrBox"></div>
+      <p class="pay-hint">El código expira en 10 minutos</p>
+      <p class="pay-total">Total a pagar: <strong>Bs <span id="total2">0</span></strong></p>
+
+      <div class="verifying" id="verifyingBox" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Verificando el pago con el banco…</p>
+      </div>
+
+      <div class="pay-actions">
+        <button class="btn-primary" type="button" id="payNowBtn" data-action="confirm-pay">Pagar ahora</button>
+        <button class="btn-secondary" type="button" id="cancelOrderBtn" data-action="cancel-order">Cancelar pedido</button>
+        <button class="btn-error" type="button" id="failPayBtn" data-action="fail-pay">Simular: Error de pago</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONFIRMACIÓN ============ -->
+  <section class="screen" id="screen-confirm">
+    <div class="result-card">
+      <div class="icon-circle success-icon" aria-hidden="true">✔</div>
+      <h2>¡Pago verificado correctamente!</h2>
+      <p>Pedido <strong id="confirmOrderNumber">#0000</strong> · tu pedido está siendo preparado por la cafetería.</p>
+      <p>Código de recojo:</p>
+      <div class="code-box" id="pickup-code">----</div>
+      <button class="btn-link" type="button" data-action="copy-code">📋 Copiar código</button>
+      <div class="pay-actions">
+        <button class="btn-primary" type="button" data-action="goto" data-target="screen-invoice">Ver factura y enviar código</button>
+        <button class="btn-secondary" type="button" data-action="goto" data-target="screen-tracking">Ver seguimiento del pedido</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FACTURA DE PAGO ============ -->
+  <section class="screen" id="screen-invoice">
+    <button class="back-link" type="button" data-action="goto" data-target="screen-menu">← Volver al menú</button>
+
+    <div class="invoice-card" id="invoiceCard">
+      <div class="invoice-head">
+        <div>
+          <h2>Factura de pago</h2>
+          <p class="subtitle">CafeQR · Universidad Privada del Valle</p>
+        </div>
+        <div class="invoice-status">✅ Pagado</div>
+      </div>
+
+      <div class="invoice-meta">
+        <div><span>N.º de pedido</span><strong id="invOrderNumber">#0000</strong></div>
+        <div><span>Fecha</span><strong id="invDate">--/--/----</strong></div>
+        <div><span>Hora</span><strong id="invTime">--:--</strong></div>
+        <div>
+          <span>Código de recojo</span>
+          <div class="invoice-code-row">
+            <strong id="invCode">----</strong>
+            <button class="invoice-copy" type="button" data-action="copy-code" title="Copiar código" aria-label="Copiar código de recojo">📋</button>
+          </div>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr><th>Producto</th><th>Cant.</th><th>P. unit.</th><th>Subtotal</th></tr>
+        </thead>
+        <tbody id="invoiceItems"></tbody>
+        <tfoot>
+          <tr><td colspan="3">Total</td><td id="invTotal">Bs 0</td></tr>
+        </tfoot>
+      </table>
+
+      <div class="invoice-row"><span>Pagado a</span><strong id="invAccount">—</strong></div>
+      <div class="invoice-row"><span>Cliente</span><strong id="invClient">—</strong></div>
+    </div>
+
+    <div class="delivery-card no-print">
+      <h3>Recibir el código de recojo</h3>
+      <p class="subtitle">Además de verlo aquí, elige cómo quieres que te lo enviemos.</p>
+
+      <label class="check-row"><input type="checkbox" id="sendEmail" checked> Correo electrónico</label>
+      <input type="text" id="deliveryEmail" placeholder="tu correo institucional">
+
+      <label class="check-row"><input type="checkbox" id="sendSms"> Mensaje de texto (SMS)</label>
+      <input type="text" id="deliveryPhone" placeholder="Número de celular">
+
+      <button class="btn-primary" type="button" data-action="send-code">Enviar código</button>
+    </div>
+
+    <div class="pay-actions invoice-actions no-print">
+      <button class="btn-secondary" type="button" data-action="print-invoice">🖨️ Imprimir factura</button>
+      <button class="btn-primary" type="button" data-action="goto" data-target="screen-tracking">Ver seguimiento del pedido</button>
+    </div>
+  </section>
+
+  <!-- ============ ERROR DE PAGO ============ -->
+  <section class="screen" id="screen-error">
+    <div class="result-card">
+      <div class="icon-circle error-icon" aria-hidden="true">✕</div>
+      <h2>No se pudo procesar el pago</h2>
+      <p>Hubo un problema al confirmar la transacción. Verifica tu saldo o intenta con otro método.</p>
+      <div class="pay-actions">
+        <button class="btn-primary" type="button" data-action="goto" data-target="screen-pay">Reintentar pago</button>
+        <button class="btn-secondary" type="button" data-action="goto" data-target="screen-menu">Volver al menú</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEGUIMIENTO ============ -->
+  <section class="screen" id="screen-tracking">
+    <button class="back-link" type="button" data-action="goto" data-target="screen-menu">← Volver al menú</button>
+    <div class="track-card">
+      <h2>Seguimiento del pedido</h2>
+      <div class="steps">
+        <div class="step done"><span class="step-dot"></span><span class="step-label">1. Pedido recibido</span></div>
+        <div class="step done"><span class="step-dot"></span><span class="step-label">2. Pago confirmado</span></div>
+        <div class="step active" id="stepPrep"><span class="step-dot"></span><span class="step-label">3. En preparación</span></div>
+        <div class="step" id="stepReady"><span class="step-dot"></span><span class="step-label">4. Listo para recoger</span></div>
+      </div>
+      <div class="pickup-line">Código de recojo: <strong id="pickup-code2">----</strong></div>
+      <button class="btn-primary" type="button" data-action="ready-order">Simular: Pedido listo</button>
+    </div>
+  </section>
+
+  <!-- ============ MIS PEDIDOS ============ -->
+  <section class="screen" id="screen-orders">
+    <button class="back-link" type="button" data-action="goto" data-target="screen-menu">← Volver al menú</button>
+    <div class="orders-card">
+      <h2>Mis pedidos</h2>
+      <div id="ordersSummary" class="orders-summary"></div>
+      <div id="ordersList" class="orders-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL DE ADMINISTRADOR ============ -->
+  <section class="screen" id="screen-admin">
+    <div class="screen-head">
+      <div>
+        <p class="eyebrow">Panel de administración</p>
+        <h2>Todos los pedidos</h2>
+      </div>
+      <p>Historial completo de compras de todos los estudiantes en CafeQR.</p>
+    </div>
+
+    <div class="admin-stats" id="adminStats"></div>
+
+    <div class="admin-orders-card">
+      <div id="adminOrdersList" class="admin-orders-list"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    CafeQR · Proyecto de Sistemas I · Universidad Privada del Valle · Equipo "Los Suchas"
+  </footer>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
