@@ -5,25 +5,27 @@
     <h2>Crear cuenta</h2>
     <p style="color:var(--ink-500);">Regístrate con tu correo institucional</p>
 
-    @if ($errors->any())
-        <div class="alert alert-error">
-            @foreach ($errors->all() as $error) {{ $error }}<br> @endforeach
-        </div>
-    @endif
-
     <form action="{{ route('register.store') }}" method="POST">
         @csrf
         <div class="field">
             <label for="name">Nombre completo</label>
-            <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="Nombre y apellido">
+            <input type="text" id="name" name="name" value="{{ old('name') }}"
+                   placeholder="Nombre y apellido" autocomplete="name" maxlength="100" required autofocus>
         </div>
         <div class="field">
             <label for="email">Correo institucional</label>
-            <input type="text" id="email" name="email" value="{{ old('email') }}" placeholder="usuario@univalle.edu">
+            <input type="email" id="email" name="email" value="{{ old('email') }}"
+                   placeholder="usuario@univalle.edu" autocomplete="email" required>
         </div>
         <div class="field">
-            <label for="password">Contraseña</label>
-            <input type="password" id="password" name="password" placeholder="••••••••">
+            <label for="password">Contraseña (mínimo 8 caracteres)</label>
+            <input type="password" id="password" name="password"
+                   placeholder="••••••••" autocomplete="new-password" minlength="8" required>
+        </div>
+        <div class="field">
+            <label for="password_confirmation">Confirmar contraseña</label>
+            <input type="password" id="password_confirmation" name="password_confirmation"
+                   placeholder="••••••••" autocomplete="new-password" minlength="8" required>
         </div>
         <button type="submit" class="btn">Crear cuenta</button>
     </form>
