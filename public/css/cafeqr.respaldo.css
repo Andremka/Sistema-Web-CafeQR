@@ -1,0 +1,347 @@
+/* ============================================================
+   CafeQR - estilos (tema guinda · Universidad Privada del Valle)
+   ============================================================ */
+:root {
+    --guinda: #7d1126;
+    --guinda-oscuro: #560a1a;
+    --guinda-profundo: #3b0712;
+    --guinda-claro: #a82b44;
+    --guinda-suave: #f8ebee;
+    --crema: #fbf7f4;
+    --dorado: #c9a45f;
+    --texto: #2b1a1e;
+    --texto-suave: #6e5a5f;
+    --borde: #e6d9dc;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    background: var(--crema);
+    color: var(--texto);
+    line-height: 1.45;
+}
+
+a { color: var(--guinda); }
+h1, h2, h3 { color: var(--guinda-oscuro); }
+h1 { margin-top: 0; }
+
+/* ---------- Formularios ---------- */
+label { display: block; margin: 14px 0 4px; font-size: 14px; font-weight: 600; color: var(--guinda-oscuro); }
+
+input[type=text], input[type=email], input[type=password], input[type=search], input[type=file], select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    font-size: 15px;
+    background: #fff;
+    color: var(--texto);
+    font-family: inherit;
+}
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--guinda);
+    box-shadow: 0 0 0 3px rgba(125, 17, 38, .15);
+}
+input[disabled] { background: #f3ecee; color: #8a767b; }
+
+.error { color: #b42318; font-size: 13px; display: block; margin-top: 4px; }
+.exito {
+    background: #dcfce7; color: #166534;
+    padding: 10px 12px; border-radius: 10px; margin-bottom: 16px; font-size: 14px;
+}
+.alerta {
+    background: #fee2e2; color: #991b1b;
+    padding: 10px 12px; border-radius: 10px; margin-bottom: 16px; font-size: 14px;
+}
+.dato { margin: 10px 0; font-size: 15px; }
+.ayuda { color: var(--texto-suave); font-size: 12px; }
+.vacio { text-align: center; padding: 36px 10px; color: var(--texto-suave); }
+
+/* ---------- Botones ---------- */
+.btn {
+    margin-top: 18px;
+    padding: 11px 18px;
+    background: var(--guinda);
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+}
+.btn:hover { background: var(--guinda-oscuro); }
+.btn.rojo { background: #b42318; }
+.btn.rojo:hover { background: #8f1d13; }
+.btn.gris { background: #6b5b60; }
+.btn.gris:hover { background: #4e4146; }
+.btn.chico { margin-top: 0; padding: 7px 11px; font-size: 13px; }
+a.btn { display: inline-block; text-decoration: none; color: #fff; }
+
+/* ============================================================
+   PÁGINAS DE ACCESO (login, registro, recuperar contraseña)
+   ============================================================ */
+body.fondo-auth {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 28px 16px;
+    background:
+        linear-gradient(160deg, rgba(59, 7, 18, .84), rgba(125, 17, 38, .62)),
+        url('../img/fondo.jpg') center / cover no-repeat fixed,
+        linear-gradient(135deg, #3b0712, #7d1126);
+}
+.auth-envoltorio { width: 100%; max-width: 460px; }
+.auth-marca { text-align: center; margin-bottom: 18px; }
+.auth-lema { color: rgba(255, 255, 255, .9); margin: 12px 0 0; font-size: 14px; letter-spacing: .3px; }
+
+.caja {
+    background: rgba(255, 255, 255, .97);
+    border-radius: 18px;
+    border-top: 5px solid var(--guinda);
+    padding: 26px 28px 28px;
+    box-shadow: 0 22px 55px rgba(0, 0, 0, .4);
+}
+.caja-marca {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 24px; font-weight: 800; color: var(--guinda);
+    margin-bottom: 14px;
+}
+.caja h1 { font-size: 22px; margin-bottom: 4px; }
+.caja button[type=submit] {
+    width: 100%;
+    margin-top: 22px;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--guinda-claro), var(--guinda));
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+}
+.caja button[type=submit]:hover { background: var(--guinda-oscuro); }
+.pie { margin: 16px 0 0; text-align: center; font-size: 14px; }
+
+/* Logo de la universidad */
+.sello-univalle {
+    display: inline-block;
+    background: rgba(255, 255, 255, .96);
+    padding: 10px 24px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+}
+.logo-univalle { display: block; max-height: 84px; max-width: 280px; }
+.logo-univalle-texto { text-align: center; color: var(--guinda); line-height: 1.15; }
+.logo-univalle-texto strong { display: block; font-size: 26px; letter-spacing: 3px; }
+.logo-univalle-texto span { font-size: 11px; color: var(--texto-suave); }
+
+/* ============================================================
+   PANEL (cuando ya iniciaste sesión)
+   ============================================================ */
+.barra {
+    background: linear-gradient(90deg, var(--guinda-profundo), var(--guinda));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 3px 14px rgba(59, 7, 18, .35);
+}
+.barra-izq { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.barra a { color: rgba(255, 255, 255, .88); text-decoration: none; font-size: 15px; }
+.barra a:hover { color: #fff; }
+.barra a.marca {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 21px; font-weight: 800; color: #fff; letter-spacing: .3px;
+}
+.barra a.carrito-link {
+    background: var(--crema);
+    color: var(--guinda);
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+}
+.barra a.carrito-link:hover { background: #fff; color: var(--guinda-oscuro); }
+
+/* Perfil en la esquina */
+details.perfil { position: relative; }
+details.perfil summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+details.perfil summary::-webkit-details-marker { display: none; }
+.barra .nombre { color: #fff; font-size: 14px; font-weight: 600; }
+.barra .avatar { border: 2px solid rgba(255, 255, 255, .75); }
+
+.menu {
+    position: absolute;
+    right: 0;
+    top: 54px;
+    background: #fff;
+    min-width: 200px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(59, 7, 18, .3);
+    padding: 6px;
+}
+.barra .menu a, .menu .salir {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-align: left;
+    background: none;
+    border: 0;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--texto);
+}
+.barra .menu a:hover { background: var(--guinda-suave); color: var(--guinda); }
+.menu .salir { color: #b42318; }
+.menu .salir:hover { background: #fdecea; }
+
+/* Avatar */
+.avatar { border-radius: 50%; object-fit: cover; display: inline-block; }
+.avatar.inicial {
+    background: var(--guinda-claro);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+/* Contenido */
+.contenedor { max-width: 1040px; margin: 26px auto; padding: 0 16px; }
+.tarjeta {
+    background: #fff;
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 4px 16px rgba(59, 7, 18, .06);
+    margin-bottom: 20px;
+}
+.columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.pie-pagina { text-align: center; color: var(--texto-suave); font-size: 13px; padding: 24px 16px 34px; }
+
+/* Portada del menú */
+.hero {
+    text-align: center;
+    color: #fff;
+    border-radius: 20px;
+    padding: 30px 20px 28px;
+    margin-bottom: 22px;
+    background:
+        linear-gradient(160deg, rgba(59, 7, 18, .82), rgba(125, 17, 38, .58)),
+        url('../img/fondo.jpg') center 35% / cover no-repeat,
+        linear-gradient(135deg, #3b0712, #7d1126);
+    box-shadow: 0 12px 32px rgba(59, 7, 18, .28);
+}
+.hero h1 { color: #fff; margin: 16px 0 4px; font-size: 30px; }
+.hero p { margin: 0; color: rgba(255, 255, 255, .9); }
+.buscador { max-width: 460px; margin: 18px auto 0; }
+.buscador input { border: 0; padding: 13px 18px; border-radius: 999px; box-shadow: 0 6px 18px rgba(0, 0, 0, .28); }
+
+/* Botones de secciones */
+.chips { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 14px; }
+.chips a {
+    white-space: nowrap;
+    text-decoration: none;
+    background: #fff;
+    color: var(--guinda);
+    border: 1px solid var(--borde);
+    padding: 8px 15px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.chips a:hover { background: var(--guinda); color: #fff; border-color: var(--guinda); }
+
+/* Secciones y productos */
+.seccion { margin-bottom: 30px; scroll-margin-top: 90px; }
+.seccion-titulo {
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 14px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--guinda);
+    font-size: 21px;
+}
+.seccion-titulo .cuenta { margin-left: auto; font-size: 13px; font-weight: 400; color: var(--texto-suave); }
+
+.grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+.producto {
+    background: #fff;
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 14px rgba(59, 7, 18, .06);
+    transition: transform .15s, box-shadow .15s;
+}
+.producto:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(59, 7, 18, .16); }
+.producto-img {
+    height: 118px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 52px;
+    background: linear-gradient(135deg, var(--guinda-suave), #f1d9df);
+}
+.producto-img img { width: 100%; height: 100%; object-fit: cover; }
+.producto-cuerpo { padding: 14px 16px 16px; display: flex; flex-direction: column; flex: 1; }
+.producto h3 { margin: 0 0 4px; font-size: 17px; }
+.producto .desc { color: var(--texto-suave); font-size: 13px; margin: 0 0 10px; flex: 1; }
+.precio { font-weight: 800; color: var(--guinda); font-size: 19px; margin: 0 0 10px; }
+.agregar { display: flex; gap: 8px; align-items: center; }
+.agregar input[type=number] {
+    width: 62px; padding: 9px;
+    border: 1px solid var(--borde); border-radius: 10px; font-size: 14px;
+}
+.agregar .btn { margin-top: 0; flex: 1; padding: 10px 12px; font-size: 14px; }
+.producto.sin-stock { opacity: .68; }
+.producto.sin-stock .producto-img { filter: grayscale(1); }
+
+/* Etiquetas de estado */
+.etiqueta { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.disponible, .estado-entregado { background: #dcfce7; color: #166534; }
+.agotado, .estado-cancelado { background: #fee2e2; color: #991b1b; }
+.estado-pendiente { background: #fef3c7; color: #92400e; }
+.estado-pagado { background: #dbeafe; color: #1e40af; }
+.estado-en_preparacion { background: #ffedd5; color: #9a3412; }
+.estado-listo { background: #ede9fe; color: #5b21b6; }
+
+/* Pedidos */
+.pedido-cab { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+th { background: var(--guinda-suave); color: var(--guinda-oscuro); }
+th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--borde); }
+.total { text-align: right; font-weight: 800; margin-top: 12px; font-size: 19px; color: var(--guinda); }
+.codigo { font-family: Consolas, monospace; background: var(--guinda-suave); color: var(--guinda-oscuro); padding: 2px 9px; border-radius: 6px; font-weight: 700; }
+.cant-form { display: flex; gap: 6px; align-items: center; }
+.cant-form input[type=number] { width: 64px; padding: 6px; border: 1px solid var(--borde); border-radius: 8px; font-size: 14px; }
+.acciones { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+.acciones .btn { margin-top: 0; }
+
+/* Celulares */
+@media (max-width: 760px) {
+    .columnas { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+    .barra { padding: 10px 14px; }
+    .barra .nombre { display: none; }
+    .hero h1 { font-size: 24px; }
+    .caja { padding: 22px 18px; }
+}

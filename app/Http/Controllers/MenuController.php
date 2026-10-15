@@ -2,32 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categoria;
+use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MenuController extends Controller
 {
-    /**
-     * Historia de usuario: HU-05 — Consultar menú disponible.
-     * Lista el catálogo agrupado por categoría, ordenado por precio,
-     * con búsqueda opcional por nombre de producto.
-     */
     public function index(Request $request): View
     {
-        $busqueda = trim((string) $request->query('q'));
+        $buscar = trim((string) $request->query('q'));
 
-        $categorias = Categoria::with(['productos' => function ($query) use ($busqueda) {
-            $query->disponibles()->orderBy('precio');
-            if ($busqueda !== '') {
-                $query->where('nombre', 'like', "%{$busqueda}%");
+        $consulta = Producto::query()->orderBy('nombre');
+        if ($buscar !== '') {
+            $consulta->where(function ($q) use ($buscar) {
+                $q->where('nombre', 'like', '%'.$buscar.'%')
+                    ->orWhere('descripcion', 'like', '%'.$buscar.'%');
+            });
+        }
+
+        $porCategoria = $consulta->get()->groupBy('categoria');
+
+        // Orden fijo de categorías; las que no estén en la lista van al final
+        $ordenadas = [];
+        foreach (array_keys(Producto::CATEGORIAS) as $cat) {
+            if ($porCategoria->has($cat)) {
+                $ordenadas[$cat] = $porCategoria[$cat];
             }
-        }])->orderBy('orden')->get()->filter(fn ($categoria) => $categoria->productos->isNotEmpty());
+        }
+        foreach ($porCategoria as $cat => $items) {
+            $ordenadas[$cat] ??= $items;
+        }
 
-        return view('menu.index', [
-            'categorias' => $categorias,
-            'busqueda' => $busqueda,
-            'carrito' => session('carrito', []),
-        ]);
+        return view('menu.dashboard', ['categorias' => $ordenadas, 'buscar' => $buscar]);
     }
 }

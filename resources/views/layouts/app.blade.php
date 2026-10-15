@@ -1,90 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>@yield('titulo', 'CafeQR')</title>
-<link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('titulo', 'Panel') · CafeQR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/cafeqr.css') }}?v=6">
 </head>
 <body>
+@php($u = auth()->user())
 
-@auth
-<header class="header">
-    <div class="logo">☕ CafeQR</div>
-    <nav class="nav">
-        @if (auth()->user()->esAdministrador())
-            <a href="{{ route('admin.index') }}">Panel Admin</a>
-        @else
-            <a href="{{ route('menu.index') }}">Menú</a>
-            <a href="{{ route('pagos.show') }}">Pago</a>
+<header class="barra">
+    <div class="barra-izq">
+        <a class="marca" href="{{ route($u->rutaInicio()) }}">
+            @include('partials.logo-cafeqr', ['tam' => 34])
+            <span>CafeQR</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Navegación principal">
+            @if ($u->esCliente())
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'activo' : '' }}">Inicio</a>
+                <a href="{{ route('pedidos.historial') }}" class="{{ request()->routeIs('pedidos.historial') ? 'activo' : '' }}">Mis pedidos</a>
+            @else
+                @if ($u->esAdministrador())
+                    <a href="{{ route('admin.panel') }}" class="{{ request()->routeIs('admin.panel') ? 'activo' : '' }}">Panel</a>
+                @endif
+                <a href="{{ route('entregas.index') }}" class="{{ request()->routeIs('entregas.*') ? 'activo' : '' }}">Entregas</a>
+                <a href="{{ route('caja.pagos') }}" class="{{ request()->routeIs('caja.*') ? 'activo' : '' }}">Caja</a>
+                <a href="{{ route('productos.index') }}" class="{{ request()->routeIs('productos.*') ? 'activo' : '' }}">Productos</a>
+                @if ($u->esAdministrador())
+                    <a href="{{ route('admin.pedidos') }}" class="{{ request()->routeIs('admin.pedidos') ? 'activo' : '' }}">Pedidos</a>
+                    <a href="{{ route('admin.facturas') }}" class="{{ request()->routeIs('admin.facturas') ? 'activo' : '' }}">Facturas</a>
+                    <a href="{{ route('admin.usuarios') }}" class="{{ request()->routeIs('admin.usuarios*', 'admin.empleado.*') ? 'activo' : '' }}">Usuarios</a>
+                @endif
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'activo' : '' }}">Ver menú</a>
+            @endif
+        </nav>
+
+        @if ($u->esCliente())
+            <a class="carrito-link" href="{{ route('pedido.actual') }}">🛒 Mi pedido @if (($itemsCarrito ?? 0) > 0)({{ $itemsCarrito }})@endif</a>
         @endif
+    </div>
 
-        <div class="user-menu-wrapper">
-            <button type="button" class="user-tag-btn" onclick="toggleUserMenu(event)">
-                <span class="avatar-circle-sm">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-                {{ Str::before(auth()->user()->name, ' ') }} ▾
-            </button>
-
-            <div class="dropdown-menu" id="userDropdown">
-                <div class="avatar-circle">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
-                <strong>{{ auth()->user()->name }}</strong>
-                <p class="email">{{ auth()->user()->email }}</p>
-
-                @unless (auth()->user()->esAdministrador())
-                    <div class="cupo-box">
-                        <span>Cupo disponible</span>
-                        <strong>Bs {{ number_format(session('cupo_disponible', 50), 0) }}</strong>
-                    </div>
-                    <form action="{{ route('cupones.canjear') }}" method="POST" class="cupo-form">
-                        @csrf
-                        <input type="text" name="codigo" placeholder="Código de cupón" maxlength="14">
-                        <button type="submit">Canjear</button>
-                    </form>
-                    <hr>
-                    <a href="{{ route('pedidos.mios') }}">📦 Mis pedidos</a>
-                @endunless
-
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="logout-btn">🚪 Cerrar sesión</button>
-                </form>
-            </div>
+    <details class="perfil">
+        <summary>
+            <span class="rol-chip">{{ $u->rol_texto }}</span>
+            <span class="nombre">{{ $u->name }}</span>
+            @include('partials.avatar', ['user' => $u, 'tam' => 40])
+        </summary>
+        <div class="menu">
+            <a href="{{ route('perfil.show') }}">👤 Mi perfil</a>
+            @if ($u->esCliente())
+                <a href="{{ route('pedidos.historial') }}">🧾 Mis pedidos</a>
+            @endif
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="salir">Cerrar sesión</button>
+            </form>
         </div>
-    </nav>
+    </details>
 </header>
-<script>
-function toggleUserMenu(event) {
-    event.stopPropagation();
-    document.getElementById('userDropdown').classList.toggle('open');
-}
-document.addEventListener('click', function (e) {
-    var menu = document.getElementById('userDropdown');
-    if (menu && !e.target.closest('.user-menu-wrapper')) {
-        menu.classList.remove('open');
-    }
-});
-</script>
-@endauth
 
-<div class="wrap">
-    @if (session('exito'))
-        <div class="alert alert-success">✓ {{ session('exito') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-error">⚠ {{ session('error') }}</div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-error">
-            @foreach ($errors->all() as $error)
-                {{ $error }}<br>
-            @endforeach
-        </div>
-    @endif
+@if (! empty($pedidoListo))
+    <div class="banner-listo">
+        <span>🎉 ¡Tu pedido #{{ $pedidoListo->id }} está listo para recoger! Código: <strong>{{ $pedidoListo->codigo }}</strong></span>
+        <a href="{{ route('pedido.seguimiento', $pedidoListo) }}">Ver detalles →</a>
+    </div>
+@endif
 
+@php($conBarra = $u->esCliente() && request()->routeIs('dashboard') && ($itemsCarrito ?? 0) > 0)
+<main class="contenedor @yield('ancho') {{ $conBarra ? 'con-barra-pedido' : '' }}">
+    @include('partials.mensajes')
     @yield('contenido')
-</div>
+</main>
 
-<div class="footer">CafeQR · Proyecto de Sistemas I · Universidad Privada del Valle · Equipo "Los Suchas"</div>
+@if ($conBarra)
+    <a class="barra-pedido" href="{{ route('pedido.actual') }}">
+        <span class="bp-n">{{ $itemsCarrito }}</span>
+        <span class="bp-txt">Tu pedido<small>{{ $itemsCarrito === 1 ? '1 producto' : $itemsCarrito.' productos' }}</small></span>
+        <span class="bp-total">Bs {{ number_format($totalCarrito ?? 0, 2) }}</span>
+        <span class="bp-go">Ver pedido</span>
+    </a>
+@endif
 
+<footer class="pie-pagina">CafeQR · Universidad Privada del Valle · La Paz, Bolivia</footer>
+
+@stack('scripts')
 </body>
 </html>
