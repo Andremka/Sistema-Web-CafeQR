@@ -1,0 +1,9 @@
+CAFEQR - ACTUALIZACION SEGURA
+1. Cierra el servidor (Ctrl+C).
+2. Descomprime este zip en una carpeta (Escritorio).
+3. Dentro de la carpeta descomprimida: clic derecho en actualizar-cafeqr.ps1 > Ejecutar con PowerShell.
+   (Hace respaldo, copia los archivos y actualiza SIN borrar usuarios, pedidos, .env, fotos ni QR.)
+   Si Windows bloquea el script: abre PowerShell en esa carpeta y escribe:
+   powershell -ExecutionPolicy Bypass -File .\actualizar-cafeqr.ps1
+4. Inicia con .\iniciar-cafeqr.bat en mi-proyecto y refresca con Ctrl+F5.
+NO uses aplicar-cambios.ps1 (borra la base de datos).
