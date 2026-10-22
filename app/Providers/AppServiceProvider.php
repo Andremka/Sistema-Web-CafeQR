@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use App\Models\Pedido;
-use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -23,22 +21,6 @@ class AppServiceProvider extends ServiceProvider
         // Paginación sencilla en español (sin depender de Tailwind)
         Paginator::defaultView('partials.paginacion');
         Paginator::defaultSimpleView('partials.paginacion');
-
-        // Correo de "olvidé mi contraseña" en español y con el diseño de CafeQR
-        ResetPassword::toMailUsing(function ($notifiable, string $token) {
-            $url = route('password.reset', [
-                'token' => $token,
-                'email' => $notifiable->getEmailForPasswordReset(),
-            ]);
-
-            return (new MailMessage)
-                ->subject('Recupera tu contraseña · CafeQR')
-                ->view('emails.recuperar', [
-                    'url' => $url,
-                    'nombre' => $notifiable->name,
-                    'minutos' => (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60),
-                ]);
-        });
 
         // Datos que necesita la barra superior en todas las pantallas del panel
         View::composer('layouts.app', function ($vista) {

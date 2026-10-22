@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Notificador;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,10 +26,22 @@ class PasswordResetController extends Controller
             'email.email' => 'Escribe un correo válido.',
         ]);
 
-        $estado = Password::sendResetLink(['email' => Str::lower(trim($request->input('email')))]);
+        $fallo = false;
+        $estado = Password::sendResetLink(
+            ['email' => Str::lower(trim($request->input('email')))],
+            function ($usuario, string $token) use (&$fallo) {
+                $url = route('password.reset', ['token' => $token, 'email' => $usuario->email]);
+                $minutos = (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60);
+                $fallo = ! Notificador::recuperar($usuario, $url, $minutos);
+            }
+        );
 
         if ($estado === Password::RESET_THROTTLED) {
             return back()->withErrors(['email' => 'Espera un minuto antes de pedir otro enlace.']);
+        }
+
+        if ($fallo) {
+            return back()->withInput()->with('error', 'No pudimos enviar el correo en este momento. Intenta de nuevo en unos minutos.');
         }
 
         // Misma respuesta exista o no el correo, para no revelar quién está registrado.

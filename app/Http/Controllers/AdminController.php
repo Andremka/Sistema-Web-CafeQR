@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Correo;
 use App\Models\Factura;
 use App\Models\Pago;
 use App\Models\Pedido;
@@ -27,7 +28,7 @@ class AdminController extends Controller
             'pedidosHoy' => (clone $vendidosHoy)->count(),
             'porVerificar' => Pago::whereIn('estado', ['por_verificar', 'por_cobrar'])->count(),
             'porEstado' => Pedido::query()->whereIn('estado', Pedido::ACTIVOS)
-                ->selectRaw('estado, count(*) as total')->groupBy('estado')->pluck('total', 'estado'),
+                ->selectRaw('estado, count(*) as cantidad')->groupBy('estado')->pluck('cantidad', 'estado'),
             'reembolsos' => Pedido::where('reembolso_pendiente', true)->count(),
             'clientes' => User::where('rol', User::ROL_CLIENTE)->count(),
             'empleados' => User::where('rol', User::ROL_EMPLEADO)->count(),
@@ -37,6 +38,7 @@ class AdminController extends Controller
             'totalFacturado' => (float) Pedido::whereHas('factura')->where('estado', '!=', Pedido::CANCELADO)->sum('total'),
             'modoPrueba' => Notificador::modoPrueba(),
             'modoPago' => config('cafeqr.pago_modo'),
+            'correosFallidos' => Correo::where('estado', Correo::FALLIDO)->where('created_at', '>=', now()->subDays(7))->count(),
         ]);
     }
 
@@ -163,5 +165,36 @@ class AdminController extends Controller
         $usuario->delete();
 
         return back()->with('exito', 'Eliminaste a '.$nombre.($pedidos ? ' y sus '.$pedidos.' pedido(s) con sus facturas' : '').'. Ya puede volver a registrarse.');
+    }
+
+    /** Historial de correos: cuáles llegaron a Gmail y cuáles fallaron (con el motivo). */
+    public function correos(Request $request): View
+    {
+        $estado = $request->query('estado');
+        $buscar = trim((string) $request->query('q'));
+
+        $correos = Correo::query()
+            ->when(in_array($estado, [Correo::ENVIADO, Correo::FALLIDO, Correo::PRUEBA], true), fn ($q) => $q->where('estado', $estado))
+            ->when($buscar !== '', fn ($q) => $q->where(fn ($q2) => $q2->where('para', 'like', '%'.$buscar.'%')->orWhere('asunto', 'like', '%'.$buscar.'%')))
+            ->latest('id')->paginate(20)->withQueryString();
+
+        return view('admin.correos', [
+            'correos' => $correos,
+            'estado' => $estado,
+            'buscar' => $buscar,
+            'modoPrueba' => Notificador::modoPrueba(),
+            'remitente' => config('mail.from.address'),
+            'usuarioSmtp' => config('mail.mailers.smtp.username'),
+            'resumen' => Correo::selectRaw('estado, count(*) as total')->groupBy('estado')->pluck('total', 'estado'),
+        ]);
+    }
+
+    public function reenviarCorreo(Correo $correo): RedirectResponse
+    {
+        if (! Notificador::reenviar($correo)) {
+            return back()->with('error', 'No se pudo reenviar a '.$correo->para.'. Motivo: '.($correo->fresh()->error ?? 'el correo no tiene contenido guardado.'));
+        }
+
+        return back()->with('exito', 'Correo reenviado a '.$correo->para.'.');
     }
 }

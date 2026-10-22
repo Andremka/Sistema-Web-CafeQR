@@ -38,7 +38,10 @@
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px">
                                     @include('partials.avatar', ['user' => $usuario, 'tam' => 36])
-                                    <div><strong>{{ $usuario->name }}</strong><br><span class="ayuda">{{ $usuario->email }}{{ $usuario->telefono ? ' · '.$usuario->telefono : '' }}</span></div>
+                                    <div><strong>{{ $usuario->name }}</strong><br><span class="ayuda">{{ $usuario->email }}{{ $usuario->telefono ? ' · '.$usuario->telefono : '' }}</span>
+                                        @if ($usuario->esCliente())
+                                            <br><span class="ayuda" title="{{ $usuario->email_verified_at ? 'Abrió el enlace del correo de bienvenida' : 'Aún no abrió el enlace del correo de bienvenida' }}">{{ $usuario->email_verified_at ? '✅ Correo confirmado' : '⏳ Correo sin confirmar' }}</span>
+                                        @endif</div>
                                 </div>
                             </td>
                             <td><span class="etiqueta rol-{{ $usuario->rol }}">{{ $usuario->rol_texto }}</span></td>

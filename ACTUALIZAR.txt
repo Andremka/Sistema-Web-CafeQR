@@ -1,9 +1,40 @@
-CAFEQR - ACTUALIZACION SEGURA
-1. Cierra el servidor (Ctrl+C).
-2. Descomprime este zip en una carpeta (Escritorio).
-3. Dentro de la carpeta descomprimida: clic derecho en actualizar-cafeqr.ps1 > Ejecutar con PowerShell.
-   (Hace respaldo, copia los archivos y actualiza SIN borrar usuarios, pedidos, .env, fotos ni QR.)
-   Si Windows bloquea el script: abre PowerShell en esa carpeta y escribe:
-   powershell -ExecutionPolicy Bypass -File .\actualizar-cafeqr.ps1
-4. Inicia con .\iniciar-cafeqr.bat en mi-proyecto y refresca con Ctrl+F5.
-NO uses aplicar-cambios.ps1 (borra la base de datos).
+CAFEQR - ACTUALIZACION (reemplazar la carpeta vieja por la nueva)
+=================================================================
+NUEVO EN ESTA VERSION
+- Correo de BIENVENIDA al registrarse (antes no se enviaba ninguno), con boton para confirmar el correo.
+- "Olvide mi contrasena" ahora usa el correo de CafeQR y ya no da error si Gmail falla.
+- Si Gmail falla, se reintenta solo. Ninguna pagina se rompe por un correo.
+- Panel del admin -> "Correos": que correos salieron, cuales fallaron, por que, y boton Reenviar.
+- Mi perfil: muestra si el correo esta confirmado y permite reenviar la confirmacion.
+- Administrador nuevo:  admi7@est.univalle.edu  /  Admi1234@   (reemplaza al admin anterior)
+- Arreglado: el panel mostraba "1.00" en vez de "1" en los contadores de pedidos.
+
+QUE NO TRAE ESTE ZIP (para no pisar lo tuyo)
+  .env (tu Gmail), database\database.sqlite (tus datos), vendor, public\fotos, public\img\qr-cobro.png, .git
+
+PASOS (PowerShell)
+1. Cierra el servidor (Ctrl+C en la terminal donde corre).
+2. Copia una vez tu carpeta mi-proyecto a otro lado como respaldo (por si acaso).
+3. Descomprime este ZIP. Entra a la carpeta CafeQR, selecciona TODO (Ctrl+A), copia (Ctrl+C),
+   pega (Ctrl+V) dentro de tu carpeta mi-proyecto y elige "Reemplazar los archivos en el destino".
+4. En PowerShell, dentro de mi-proyecto:
+     php artisan optimize:clear
+     php artisan migrate --force
+     php artisan db:seed --class=ProductoSeeder --force
+     php artisan db:seed --class=CuponSeeder --force
+5. Prueba el correo (pon tu Gmail):
+     php artisan correo:probar tucorreo@gmail.com
+6. Inicia:  .\iniciar-cafeqr.bat   y en el navegador Ctrl+F5.
+7. Entra como admin: admi7@est.univalle.edu / Admi1234@
+
+OPCIONAL: en vez de los pasos 3 y 4, puedes ejecutar actualizar-cafeqr.ps1 (clic derecho >
+"Ejecutar con PowerShell"): hace respaldo, copia y actualiza solo.
+
+PARA QUE LOS CORREOS LLEGUEN DE VERDAD (.env)
+  MAIL_MAILER=smtp
+  MAIL_HOST=smtp.gmail.com
+  MAIL_PORT=587
+  MAIL_USERNAME=tucorreo@gmail.com
+  MAIL_PASSWORD=tus16letrasdeaplicacion
+  MAIL_FROM_ADDRESS=tucorreo@gmail.com      <- el MISMO Gmail que MAIL_USERNAME
+Despues de cambiar el .env:  php artisan config:clear

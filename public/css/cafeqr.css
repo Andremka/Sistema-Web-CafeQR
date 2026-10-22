@@ -318,6 +318,7 @@ details.perfil summary::-webkit-details-marker { display: none; }
 .cat-comidas           { --c: #a3341f; --c-t: #fbe3dc; }
 .cat-postres           { --c: #94285f; --c-t: #f7dfeb; }
 .cat-snacks            { --c: #4f43a8; --c-t: #e5e2f7; }
+.cat-combos            { --c: #8a4b12; --c-t: #f6e6d3; }
 .seccion, .producto { --c: var(--vino); --c-t: var(--vino-suave); }
 .seccion.cat-bebidas-calientes, .producto.cat-bebidas-calientes { --c: #9a5b0c; --c-t: #fbefd9; }
 .seccion.cat-bebidas-frias, .producto.cat-bebidas-frias { --c: #0b6f7e; --c-t: #d9f0f3; }
@@ -325,6 +326,7 @@ details.perfil summary::-webkit-details-marker { display: none; }
 .seccion.cat-comidas, .producto.cat-comidas { --c: #a3341f; --c-t: #fbe3dc; }
 .seccion.cat-postres, .producto.cat-postres { --c: #94285f; --c-t: #f7dfeb; }
 .seccion.cat-snacks, .producto.cat-snacks { --c: #4f43a8; --c-t: #e5e2f7; }
+.seccion.cat-combos, .producto.cat-combos { --c: #8a4b12; --c-t: #f6e6d3; }
 .seccion-titulo .ico { width: 42px; height: 42px; border-radius: 12px; background: var(--c-t); display: grid; place-items: center; font-size: 22px; }
 
 .grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
@@ -576,3 +578,9 @@ details.cancelar-pedido[open] summary { margin-bottom: 8px; }
     .tarjeta { box-shadow: none; border: 0; }
 }
 h1 + .tarjeta, h1 + .tarjeta-pedido { margin-top: 16px; }
+
+/* ---- Cupón de descuento (aporte de main) ---- */
+.cupon-caja { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--borde, #e6d9dc); }
+.cupon-form { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.cupon-form input { flex: 1 1 130px; min-width: 0; text-transform: uppercase; }
+.btn.chico { padding: 8px 14px; font-size: .9rem; }

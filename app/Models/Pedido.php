@@ -33,7 +33,7 @@ class Pedido extends Model
     ];
 
     protected $fillable = [
-        'user_id', 'estado', 'total', 'codigo', 'metodo_pago', 'razon_social', 'nit_ci',
+        'user_id', 'estado', 'total', 'cupon', 'descuento', 'codigo', 'metodo_pago', 'razon_social', 'nit_ci',
         'tiempo_estimado', 'preparacion_inicio', 'pagado_en', 'listo_en', 'entregado_en',
         'cancelado_por', 'motivo_cancelacion', 'cancelado_en', 'reembolso_pendiente', 'reembolsado_en',
     ];
@@ -42,6 +42,7 @@ class Pedido extends Model
     {
         return [
             'total' => 'decimal:2',
+            'descuento' => 'decimal:2',
             'tiempo_estimado' => 'integer',
             'preparacion_inicio' => 'datetime',
             'pagado_en' => 'datetime',
@@ -73,10 +74,32 @@ class Pedido extends Model
         return $this->hasOne(Factura::class);
     }
 
+    /** Suma de los productos, antes de aplicar cupones. */
+    public function subtotalProductos(): float
+    {
+        return round($this->detalles()->get()->sum(fn ($d) => (float) $d->precio_unitario * (int) $d->cantidad), 2);
+    }
+
+    /**
+     * Total = productos − descuento del cupón. El cupón solo vale si el pedido es mayor
+     * que su monto (el total nunca queda en cero); si deja de cumplirse, se quita solo.
+     */
     public function recalcularTotal(): void
     {
-        $total = $this->detalles()->get()->sum(fn ($d) => (float) $d->precio_unitario * (int) $d->cantidad);
-        $this->update(['total' => round($total, 2)]);
+        $subtotal = $this->subtotalProductos();
+        $descuento = 0.0;
+        $cupon = $this->cupon;
+
+        if ($cupon) {
+            $registro = Cupon::buscar($cupon);
+            if ($registro && $subtotal > (float) $registro->monto) {
+                $descuento = (float) $registro->monto;
+            } else {
+                $cupon = null;
+            }
+        }
+
+        $this->update(['total' => round($subtotal - $descuento, 2), 'cupon' => $cupon, 'descuento' => $descuento]);
     }
 
     public function getEstadoTextoAttribute(): string

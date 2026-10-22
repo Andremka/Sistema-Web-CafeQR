@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cupon;
 use App\Models\DetallePedido;
 use App\Models\Pago;
 use App\Models\Pedido;
@@ -122,6 +123,45 @@ class PedidoController extends Controller
         $pedido->load('detalles');
 
         return view('pedidos.confirmar', ['pedido' => $pedido, 'usuario' => $request->user()]);
+    }
+
+    /** Aplica un cupón de descuento al pedido que se está armando. */
+    public function aplicarCupon(Request $request): RedirectResponse
+    {
+        $datos = $request->validate(['cupon' => ['required', 'string', 'max:20']], [
+            'cupon.required' => 'Escribe el código del cupón.',
+            'cupon.max' => 'El código del cupón es muy largo.',
+        ]);
+
+        $pedido = $request->user()->pedidos()->where('estado', Pedido::CARRITO)->latest('id')->first();
+        if (! $pedido || $pedido->detalles()->count() === 0) {
+            return redirect()->route('pedido.actual')->with('error', 'Primero agrega productos a tu pedido.');
+        }
+
+        $cupon = Cupon::buscar($datos['cupon']);
+        if (! $cupon) {
+            return back()->with('error', 'Ese cupón no existe o ya no está activo.');
+        }
+
+        if ($pedido->subtotalProductos() <= (float) $cupon->monto) {
+            return back()->with('error', 'El cupón '.$cupon->codigo.' descuenta Bs '.number_format($cupon->monto, 2).' y se usa en pedidos mayores a ese monto.');
+        }
+
+        $pedido->update(['cupon' => $cupon->codigo]);
+        $pedido->recalcularTotal();
+
+        return back()->with('exito', 'Cupón '.$cupon->codigo.' aplicado: −Bs '.number_format($cupon->monto, 2).'.');
+    }
+
+    public function quitarCupon(Request $request): RedirectResponse
+    {
+        $pedido = $request->user()->pedidos()->where('estado', Pedido::CARRITO)->latest('id')->first();
+        if ($pedido) {
+            $pedido->update(['cupon' => null]);
+            $pedido->recalcularTotal();
+        }
+
+        return back()->with('exito', 'Quitamos el cupón.');
     }
 
     /** Guarda los datos, deja el pedido pendiente de pago y abre la pantalla de pago elegida. */

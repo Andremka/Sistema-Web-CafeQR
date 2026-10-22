@@ -21,6 +21,22 @@ class ProbarCorreo extends Command
             $this->warn('Para que lleguen de verdad, configura MAIL_MAILER=smtp y los datos de Gmail en el archivo .env');
         }
 
+        if (config('mail.default') === 'smtp') {
+            $usuario = (string) config('mail.mailers.smtp.username');
+            $remitente = (string) config('mail.from.address');
+            $clave = (string) config('mail.mailers.smtp.password');
+
+            if ($usuario === '' || $clave === '') {
+                $this->error('Falta MAIL_USERNAME o MAIL_PASSWORD en el .env.');
+            }
+            if (strlen($clave) !== 16) {
+                $this->warn('La contraseña de aplicación de Google tiene 16 letras; la tuya tiene '.strlen($clave).'. Revisa MAIL_PASSWORD.');
+            }
+            if (strtolower($usuario) !== strtolower($remitente)) {
+                $this->warn('MAIL_FROM_ADDRESS ('.$remitente.') no es igual a MAIL_USERNAME ('.$usuario.'). Pon el mismo Gmail en los dos para que no caigan en spam.');
+            }
+        }
+
         try {
             Mail::to($this->argument('correo'))->send(new CafeQrMail(
                 'Prueba de correo · CafeQR',
@@ -28,7 +44,7 @@ class ProbarCorreo extends Command
                 ['mensaje' => 'Si lees esto, el envío de correos de CafeQR funciona correctamente.']
             ));
         } catch (\Throwable $e) {
-            $this->error('No se pudo enviar: '.$e->getMessage());
+            $this->error('No se pudo enviar: '.\App\Services\Notificador::errorEntendible($e->getMessage()));
 
             return self::FAILURE;
         }

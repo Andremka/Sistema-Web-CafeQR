@@ -6,23 +6,29 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Crea (o actualiza) al ADMINISTRADOR. Es la única cuenta que se crea "a mano en el código";
- * los clientes se registran solos y los empleados los crea el administrador desde su panel.
- * Datos configurables en .env: ADMIN_NOMBRE, ADMIN_EMAIL, ADMIN_PASSWORD
+ * Crea o actualiza al ADMINISTRADOR (único usuario creado por código).
+ *   Correo:     admi7@est.univalle.edu
+ *   Contraseña: Admi1234@
+ * Se puede repetir sin riesgo:  php artisan db:seed --class=AdminSeeder
+ * Si había un administrador con otro correo, se actualiza ese mismo (no queda duplicado).
  */
 class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = config('cafeqr.admin');
+        $datos = config('cafeqr.admin');
+        $correo = strtolower(trim($datos['email']));
 
-        User::updateOrCreate(
-            ['email' => strtolower($admin['email'])],
-            [
-                'name' => $admin['nombre'],
-                'rol' => User::ROL_ADMIN,
-                'password' => $admin['password'],
-            ]
-        );
+        $admin = User::where('email', $correo)->first()
+            ?? User::where('rol', User::ROL_ADMIN)->orderBy('id')->first()
+            ?? new User;
+
+        $admin->forceFill([
+            'name' => $datos['nombre'],
+            'email' => $correo,
+            'rol' => User::ROL_ADMIN,
+            'password' => $datos['password'],
+            'email_verified_at' => $admin->email_verified_at ?? now(),
+        ])->save();
     }
 }

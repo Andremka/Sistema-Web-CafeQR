@@ -26,8 +26,9 @@ try {
         Copy-Item (Join-Path $origen "database\$d") $dest -Recurse -Force
     }
     Copy-Item (Join-Path $origen 'public\css') (Join-Path $Proyecto 'public') -Recurse -Force
+    Copy-Item (Join-Path $origen 'public\index.php') (Join-Path $Proyecto 'public\index.php') -Force
     foreach ($d in 'productos','fotos','img') { New-Item -ItemType Directory -Force -Path (Join-Path $Proyecto "public\$d") | Out-Null }
-    foreach ($f in 'bootstrap\app.php','bootstrap\providers.php','phpunit.xml','iniciar-cafeqr.bat','permitir-firewall.bat','.env.example','composer.json','LEEME.txt') {
+    foreach ($f in 'bootstrap\app.php','bootstrap\providers.php','phpunit.xml','iniciar-cafeqr.bat','permitir-firewall.bat','.env.example','composer.json','LEEME.txt','ACTUALIZAR.txt','.gitignore') {
         Copy-Item (Join-Path $origen $f) (Join-Path $Proyecto $f) -Force
     }
 
@@ -39,10 +40,12 @@ try {
         php artisan optimize:clear
         php artisan migrate --force
         php artisan db:seed --class=ProductoSeeder --force
+        php artisan db:seed --class=CuponSeeder --force
     }
     finally { Pop-Location }
 
     Write-Host ""
+    Write-Host "Administrador: admi7@est.univalle.edu  /  Admi1234@" -ForegroundColor Green
     Write-Host "LISTO. Inicia con:  .\iniciar-cafeqr.bat   y refresca el navegador con Ctrl+F5" -ForegroundColor Green
     Write-Host "Si algo sale mal, tu respaldo esta en: $backup" -ForegroundColor Green
 }

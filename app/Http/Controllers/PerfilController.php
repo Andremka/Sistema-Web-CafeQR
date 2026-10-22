@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Services\Notificador;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -82,5 +84,40 @@ class PerfilController extends Controller
         $request->user()->update(['password' => $request->input('password')]);
 
         return back()->with('exito', 'Cambiaste tu contraseña.');
+    }
+
+    /** Enlace del correo de bienvenida: marca el correo como confirmado. */
+    public function verificarCorreo(Request $request, int $id, string $hash): RedirectResponse
+    {
+        $usuario = User::find($id);
+
+        if (! $usuario || ! hash_equals(sha1($usuario->email), $hash)) {
+            return redirect()->route('login')->with('error', 'El enlace de verificación no es válido.');
+        }
+
+        if (! $usuario->email_verified_at) {
+            $usuario->forceFill(['email_verified_at' => now()])->save();
+        }
+
+        $destino = $request->user() ? route('perfil.show') : route('login');
+
+        return redirect($destino)->with('exito', '¡Listo! Confirmaste tu correo '.$usuario->email.'.');
+    }
+
+    public function reenviarVerificacion(Request $request): RedirectResponse
+    {
+        $usuario = $request->user();
+
+        if ($usuario->email_verified_at) {
+            return back()->with('exito', 'Tu correo ya está confirmado.');
+        }
+
+        if (! Notificador::bienvenida($usuario)) {
+            return back()->with('error', 'No se pudo enviar el correo a '.$usuario->email.'. Avísale al administrador de la cafetería.');
+        }
+
+        return back()->with('exito', Notificador::modoPrueba()
+            ? 'Modo prueba: el correo no sale a internet (MAIL_MAILER=log).'
+            : 'Te reenviamos el correo a '.$usuario->email.'. Revisa también Spam o Promociones.');
     }
 }

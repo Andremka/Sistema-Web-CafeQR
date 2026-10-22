@@ -24,6 +24,10 @@ Route::get('/', function () {
 Route::get('/pagar/{referencia}', [PagoController::class, 'escanear'])->where('referencia', '[A-Za-z0-9]+')->name('pagar.escanear');
 Route::post('/pagar/{referencia}', [PagoController::class, 'ejecutar'])->where('referencia', '[A-Za-z0-9]+')->name('pagar.ejecutar');
 
+/* ---- Enlace del correo de bienvenida (funciona con o sin sesión iniciada) ---- */
+Route::get('/correo/verificar/{id}/{hash}', [PerfilController::class, 'verificarCorreo'])
+    ->middleware(['signed', 'throttle:12,1'])->name('correo.verificar');
+
 /* ---- Visitantes ---- */
 Route::middleware('guest')->group(function () {
     Route::get('/registro', [AuthController::class, 'mostrarRegistro'])->name('registro');
@@ -46,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [PerfilController::class, 'mostrar'])->name('perfil.show');
     Route::post('/perfil', [PerfilController::class, 'actualizar'])->name('perfil.update');
     Route::post('/perfil/password', [PerfilController::class, 'cambiarPassword'])->name('perfil.password');
+    Route::post('/perfil/verificacion', [PerfilController::class, 'reenviarVerificacion'])->middleware('throttle:3,1')->name('perfil.verificacion');
 
     Route::get('/factura/{pedido}', [FacturaController::class, 'mostrar'])->name('factura.show');
 
@@ -57,6 +62,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/mi-pedido/detalle/{detalle}', [PedidoController::class, 'quitar'])->name('pedido.quitar');
         Route::get('/mi-pedido/confirmar', [PedidoController::class, 'confirmar'])->name('pedido.confirmar');
         Route::post('/mi-pedido/pagar', [PedidoController::class, 'pagar'])->name('pedido.pagar');
+        Route::post('/mi-pedido/cupon', [PedidoController::class, 'aplicarCupon'])->name('pedido.cupon');
+        Route::delete('/mi-pedido/cupon', [PedidoController::class, 'quitarCupon'])->name('pedido.cupon.quitar');
         Route::get('/mi-pedido/continuar', [PedidoController::class, 'continuar'])->name('pedido.continuar');
         Route::post('/mi-pedido/modificar', [PedidoController::class, 'modificar'])->name('pedido.modificar');
         Route::get('/mis-pedidos', [PedidoController::class, 'historial'])->name('pedidos.historial');
@@ -108,5 +115,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/usuarios/empleado', [AdminController::class, 'guardarEmpleado'])->name('admin.empleado.guardar');
         Route::post('/usuarios/{usuario}/rol', [AdminController::class, 'cambiarRol'])->name('admin.usuarios.rol');
         Route::delete('/usuarios/{usuario}', [AdminController::class, 'eliminar'])->name('admin.usuarios.eliminar');
+        Route::get('/correos', [AdminController::class, 'correos'])->name('admin.correos');
+        Route::post('/correos/{correo}/reenviar', [AdminController::class, 'reenviarCorreo'])->name('admin.correos.reenviar');
     });
 });

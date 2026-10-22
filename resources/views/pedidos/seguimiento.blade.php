@@ -74,6 +74,7 @@
                 </tbody>
             </table>
         </div>
+        @if ($pedido->descuento > 0)<p class="ayuda" style="text-align:right;margin:0">Cupón {{ $pedido->cupon }}: −Bs {{ number_format($pedido->descuento, 2) }}</p>@endif
         <p class="total">Total: Bs {{ number_format($pedido->total, 2) }}</p>
 
         <div class="acciones">

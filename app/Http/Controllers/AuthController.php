@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RegistroRequest;
 use App\Models\User;
+use App\Services\Notificador;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +33,19 @@ class AuthController extends Controller
         Auth::login($usuario);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard')->with('exito', '¡Bienvenido a CafeQR, '.$usuario->name.'! Ya puedes hacer tu pedido.');
+        $enviado = Notificador::bienvenida($usuario);
+        $bienvenida = '¡Bienvenido a CafeQR, '.$usuario->name.'! Ya puedes hacer tu pedido.';
+
+        if (! $enviado) {
+            return redirect()->route('dashboard')->with('exito', $bienvenida)
+                ->with('error', 'No pudimos enviarte el correo de bienvenida a '.$usuario->email.'. Revisa que esté bien escrito; puedes reenviarlo desde Mi perfil.');
+        }
+
+        $aviso = Notificador::modoPrueba()
+            ? ' (Modo prueba: el correo no sale a internet.)'
+            : ' Te enviamos un correo a '.$usuario->email.' para confirmarlo; si no lo ves, revisa Spam o Promociones.';
+
+        return redirect()->route('dashboard')->with('exito', $bienvenida.$aviso);
     }
 
     public function mostrarLogin(): View

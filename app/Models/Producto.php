@@ -15,6 +15,7 @@ class Producto extends Model
         'Comidas' => '🍔',
         'Postres' => '🍰',
         'Snacks' => '🍪',
+        'Combos' => '🍽️',
     ];
 
     protected $fillable = ['nombre', 'descripcion', 'precio', 'categoria', 'disponible', 'imagen'];

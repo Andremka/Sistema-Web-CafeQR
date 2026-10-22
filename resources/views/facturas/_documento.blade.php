@@ -43,6 +43,9 @@
     </table>
 </div>
 
+@if ($pedido->descuento > 0)
+    <p class="en-letras" style="text-align:right">Subtotal: Bs {{ number_format($pedido->total + $pedido->descuento, 2) }} · Cupón {{ $pedido->cupon }}: −Bs {{ number_format($pedido->descuento, 2) }}</p>
+@endif
 <p class="total">TOTAL: Bs {{ number_format($pedido->total, 2) }}</p>
 <p class="en-letras">Son: {{ $enLetras }}</p>
 

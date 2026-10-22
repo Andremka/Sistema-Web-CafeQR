@@ -69,6 +69,23 @@ class ProductoSeeder extends Seeder
             ['Dona glaseada', 'Dona con cobertura de chocolate', 6, 'Snacks'],
             ['Galletas', 'Paquete de galletas', 4, 'Snacks'],
             ['Mix de frutos secos', 'Almendras, maní y pasas', 8, 'Snacks'],
+            // — Del menú de la rama main del equipo —
+            ['Té emoliente', 'Infusión caliente de emoliente con limón', 4, 'Bebidas calientes'],
+            ['Té verde', 'Té verde natural en infusión', 4, 'Bebidas calientes'],
+            ['Milkshake de vainilla', 'Batido cremoso de helado de vainilla', 12, 'Bebidas frías'],
+            ['Jugo de maracuyá', 'Maracuyá natural con hielo', 8, 'Bebidas frías'],
+            ['Choripán', 'Chorizo a la parrilla en pan crujiente', 10, 'Sándwiches'],
+            ['Tostada de jamón y queso', 'Pan tostado con jamón y queso fundido', 9, 'Sándwiches'],
+            ['Wrap de pollo', 'Tortilla rellena de pollo y verduras', 11, 'Sándwiches'],
+            ['Empanada de carne', 'Empanada horneada de carne', 7, 'Snacks'],
+            ['Galletas de avena', 'Galletas caseras de avena', 4, 'Postres'],
+            ['Panqueque', 'Panqueque con dulce de leche', 8, 'Postres'],
+            ['Waffle con miel', 'Waffle caliente con miel', 9, 'Postres'],
+            ['Combo tarde', 'Té + alfajor', 8, 'Combos'],
+            ['Combo desayuno', 'Café + muffin', 10, 'Combos'],
+            ['Combo salado', 'Sándwich + jugo', 18, 'Combos'],
+            ['Combo energía', 'Frappé + brownie', 16, 'Combos'],
+            ['Combo ejecutivo', 'Sándwich + jugo + muffin', 22, 'Combos'],
         ];
 
         foreach ($menu as [$nombre, $descripcion, $precio, $categoria]) {

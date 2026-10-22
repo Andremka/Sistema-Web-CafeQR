@@ -77,7 +77,27 @@
                         <span>Bs {{ number_format($detalle->subtotal, 2) }}</span>
                     </div>
                 @endforeach
+                @if ($pedido->descuento > 0)
+                    <div class="resumen-linea"><span>Subtotal</span><span>Bs {{ number_format($pedido->total + $pedido->descuento, 2) }}</span></div>
+                    <div class="resumen-linea"><span>Cupón {{ $pedido->cupon }}</span><span>−Bs {{ number_format($pedido->descuento, 2) }}</span></div>
+                @endif
                 <div class="resumen-total"><span>Total</span><span>Bs {{ number_format($pedido->total, 2) }}</span></div>
+
+                <div class="cupon-caja">
+                    @if ($pedido->cupon)
+                        <form method="POST" action="{{ route('pedido.cupon.quitar') }}" class="cupon-form">
+                            @csrf @method('DELETE')
+                            <span>🎟️ Cupón <strong>{{ $pedido->cupon }}</strong> aplicado</span>
+                            <button type="submit" class="btn contorno chico">Quitar</button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('pedido.cupon') }}" class="cupon-form">
+                            @csrf
+                            <input type="text" name="cupon" placeholder="¿Tienes un cupón?" maxlength="20" autocomplete="off" aria-label="Código de cupón">
+                            <button type="submit" class="btn contorno chico">Aplicar</button>
+                        </form>
+                    @endif
+                </div>
 
                 <button type="submit" form="form-pago" class="btn block" style="margin-top:16px">Pagar Bs {{ number_format($pedido->total, 2) }}</button>
                 <p class="centro" style="margin:12px 0 0"><a href="{{ route('pedido.actual') }}">← Modificar pedido</a></p>

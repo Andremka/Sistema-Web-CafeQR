@@ -3,11 +3,15 @@
 namespace Tests\Feature;
 
 use App\Mail\CafeQrMail;
+use App\Models\Correo;
+use App\Services\Notificador;
+use Illuminate\Support\Facades\URL;
 use App\Models\Pago;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\User;
 use Database\Seeders\AdminSeeder;
+use Database\Seeders\CuponSeeder;
 use Database\Seeders\ProductoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -23,6 +27,7 @@ class CafeQrTest extends TestCase
         config(['cafeqr.pago_modo' => 'demo', 'cafeqr.dominio' => 'univalle.edu']);
         $this->seed(AdminSeeder::class);
         $this->seed(ProductoSeeder::class);
+        $this->seed(CuponSeeder::class);
         Mail::fake();
     }
 
@@ -449,5 +454,178 @@ class CafeQrTest extends TestCase
         } finally {
             @unlink($ruta);
         }
+    }
+
+    /* ------------------------------ Cupones (aporte de main) ------------------------------ */
+
+    public function test_cupon_valido_descuenta_y_se_ve_en_el_pago(): void
+    {
+        $cliente = $this->usuario();
+        $producto = Producto::where('disponible', true)->where('precio', '>=', 8)->first();
+        $this->actingAs($cliente)->post(route('pedido.agregar', $producto), ['cantidad' => 3]); // más de Bs 20
+        $subtotal = 3 * (float) $producto->precio;
+
+        $this->actingAs($cliente)->post(route('pedido.cupon'), ['cupon' => ' univalle10 '])->assertSessionHas('exito');
+        $pedido = $cliente->pedidos()->latest('id')->first();
+        $this->assertSame('UNIVALLE10', $pedido->cupon);
+        $this->assertEqualsWithDelta($subtotal - 10, (float) $pedido->total, 0.001);
+
+        $this->actingAs($cliente)->post(route('pedido.pagar'), ['metodo' => 'qr'])->assertRedirect();
+        $this->assertEqualsWithDelta($subtotal - 10, (float) Pago::latest('id')->first()->monto, 0.001);
+    }
+
+    public function test_cupon_invalido_o_muy_grande_se_rechaza(): void
+    {
+        $cliente = $this->usuario();
+        $barato = Producto::where('disponible', true)->orderBy('precio')->first(); // Bs 4 a 5
+        $this->actingAs($cliente)->post(route('pedido.agregar', $barato));
+
+        $this->actingAs($cliente)->post(route('pedido.cupon'), ['cupon' => 'NOEXISTE'])->assertSessionHas('error');
+        $this->actingAs($cliente)->post(route('pedido.cupon'), ['cupon' => 'CAFEQR20'])->assertSessionHas('error');
+        $this->actingAs($cliente)->post(route('pedido.cupon'), [])->assertSessionHasErrors('cupon');
+        $this->assertNull($cliente->pedidos()->latest('id')->first()->cupon);
+    }
+
+    public function test_cupon_se_quita_solo_si_el_pedido_baja_del_monto(): void
+    {
+        $cliente = $this->usuario();
+        $caro = Producto::where('disponible', true)->where('precio', '>=', 12)->first();
+        $this->actingAs($cliente)->post(route('pedido.agregar', $caro), ['cantidad' => 1]);
+        $this->actingAs($cliente)->post(route('pedido.agregar', $caro), ['cantidad' => 1]); // 2 unidades
+        $this->actingAs($cliente)->post(route('pedido.cupon'), ['cupon' => 'UNIVALLE10']);
+        $pedido = $cliente->pedidos()->latest('id')->first();
+        $this->assertSame('UNIVALLE10', $pedido->fresh()->cupon);
+
+        $detalle = $pedido->detalles()->first();
+        $this->actingAs($cliente)->patch(route('pedido.cambiar', $detalle), ['cantidad' => 1]);
+        $pedido->refresh();
+        if ((float) $caro->precio <= 10) {
+            $this->assertNull($pedido->cupon);
+        } else {
+            $this->assertEqualsWithDelta((float) $caro->precio - 10, (float) $pedido->total, 0.001);
+        }
+        $this->actingAs($cliente)->delete(route('pedido.cupon.quitar'));
+        $this->assertNull($pedido->fresh()->cupon);
+        $this->assertEqualsWithDelta((float) $caro->precio, (float) $pedido->fresh()->total, 0.001);
+    }
+
+    public function test_menu_muestra_la_categoria_combos(): void
+    {
+        $this->actingAs($this->usuario())->get(route('dashboard'))->assertOk()->assertSee('Combo ejecutivo')->assertSee('Combos');
+    }
+
+    /* ------------------------------ Correos (bienvenida, recuperar, historial) ------------------------------ */
+
+    private function correosDe(string $vista)
+    {
+        return Mail::sent(CafeQrMail::class)->filter(fn ($m) => $m->vistaCorreo === $vista);
+    }
+
+    public function test_registro_envia_correo_de_bienvenida_y_lo_guarda(): void
+    {
+        $this->post(route('registro.guardar'), [
+            'name' => 'Lucia Rios', 'email' => 'lucia@est.univalle.edu',
+            'password' => 'Clave12345', 'password_confirmation' => 'Clave12345',
+        ])->assertSessionHasNoErrors()->assertSessionHas('exito');
+
+        $enviados = $this->correosDe('emails.bienvenida');
+        $this->assertCount(1, $enviados);
+        $this->assertTrue($enviados->first()->hasTo('lucia@est.univalle.edu'));
+        $this->assertDatabaseHas('correos', ['para' => 'lucia@est.univalle.edu', 'tipo' => 'bienvenida']);
+    }
+
+    public function test_enlace_de_bienvenida_confirma_el_correo(): void
+    {
+        $cliente = $this->usuario();
+        $this->assertNull($cliente->email_verified_at);
+
+        $this->get(Notificador::enlaceVerificacion($cliente))->assertRedirect(route('login'));
+        $this->assertNotNull($cliente->fresh()->email_verified_at);
+
+        // Enlace manipulado (sin firma válida) no sirve
+        $otro = $this->usuario();
+        $this->get(route('correo.verificar', ['id' => $otro->id, 'hash' => sha1($otro->email)]))->assertStatus(403);
+        $this->assertNull($otro->fresh()->email_verified_at);
+    }
+
+    public function test_cliente_puede_reenviar_confirmacion_desde_perfil(): void
+    {
+        $cliente = $this->usuario();
+        $this->actingAs($cliente)->get(route('perfil.show'))->assertOk()->assertSee('Sin confirmar');
+        $this->actingAs($cliente)->post(route('perfil.verificacion'))->assertSessionHas('exito');
+        $this->assertCount(1, $this->correosDe('emails.bienvenida'));
+    }
+
+    public function test_recuperar_contrasena_envia_correo_cafeqr(): void
+    {
+        $cliente = $this->usuario('cliente', 'olvido@est.univalle.edu');
+        $this->post(route('password.email'), ['email' => 'OLVIDO@est.univalle.edu'])->assertSessionHas('exito');
+
+        $enviados = $this->correosDe('emails.recuperar');
+        $this->assertCount(1, $enviados);
+        $this->assertStringContainsString('/restablecer/', $enviados->first()->datos['url']);
+
+        // Correo que no existe: misma respuesta y no se envía nada
+        $this->post(route('password.email'), ['email' => 'nadie@est.univalle.edu'])->assertSessionHas('exito');
+        $this->assertCount(1, $this->correosDe('emails.recuperar'));
+    }
+
+    public function test_si_gmail_falla_no_se_rompe_y_queda_registrado(): void
+    {
+        // Servidor de correo inexistente: el envío falla de verdad
+        Mail::swap(new \Illuminate\Mail\MailManager($this->app));
+        config(['mail.default' => 'smtp', 'mail.mailers.smtp.host' => '127.0.0.1', 'mail.mailers.smtp.port' => 1, 'mail.mailers.smtp.timeout' => 2]);
+        app('mail.manager')->purge();
+
+        // Registro: la cuenta se crea igual y avisa del problema
+        $this->post(route('registro.guardar'), [
+            'name' => 'Pedro Paz', 'email' => 'pedro@est.univalle.edu',
+            'password' => 'Clave12345', 'password_confirmation' => 'Clave12345',
+        ])->assertRedirect(route('dashboard'))->assertSessionHas('error');
+        $this->assertAuthenticated();
+
+        $fallido = Correo::where('para', 'pedro@est.univalle.edu')->firstOrFail();
+        $this->assertSame('fallido', $fallido->estado);
+        $this->assertSame(2, $fallido->intentos);   // se reintentó
+        $this->assertNotEmpty($fallido->html);
+
+        // Recuperar contraseña: tampoco da error 500
+        auth()->logout();
+        $this->post(route('password.email'), ['email' => 'pedro@est.univalle.edu'])->assertRedirect()->assertSessionHas('error');
+
+        // El admin lo ve y lo puede reenviar (vuelve a fallar sin romperse)
+        $this->actingAs($this->admin())->get(route('admin.correos', ['estado' => 'fallido']))->assertOk()->assertSee('pedro@est.univalle.edu');
+        $this->actingAs($this->admin())->post(route('admin.correos.reenviar', $fallido))->assertSessionHas('error');
+    }
+
+    public function test_admin_ve_correos_y_reenvia(): void
+    {
+        $cliente = $this->usuario();
+        Notificador::bienvenida($cliente);
+        $correo = Correo::latest('id')->firstOrFail();
+        $correo->update(['estado' => 'fallido', 'error' => 'prueba']);
+
+        $this->actingAs($this->admin())->get(route('admin.panel'))->assertOk()->assertSee('Correos que no se enviaron');
+        $this->actingAs($this->admin())->get(route('admin.correos'))->assertOk()->assertSee($cliente->email);
+        $this->actingAs($this->admin())->post(route('admin.correos.reenviar', $correo))->assertSessionHas('exito');
+        $this->assertNotSame('fallido', $correo->fresh()->estado);
+
+        $this->actingAs($cliente)->get(route('admin.correos'))->assertRedirect();
+    }
+
+    public function test_admin_nuevo_admi7_y_reemplaza_al_viejo(): void
+    {
+        $this->assertSame('admi7@est.univalle.edu', config('cafeqr.admin.email'));
+        $this->post(route('login.entrar'), ['email' => 'admi7@est.univalle.edu', 'password' => 'Admi1234@'])->assertRedirect(route('admin.panel'));
+        auth()->logout();
+
+        // Si existía un admin con el correo viejo, se actualiza ese mismo (no queda duplicado)
+        $this->admin()->update(['email' => 'viejo@est.univalle.edu', 'password' => 'Vieja12345']);
+        (new \Database\Seeders\AdminSeeder)->run();
+        $this->assertSame(1, User::where('rol', 'administrador')->count());
+        $this->assertSame('admi7@est.univalle.edu', $this->admin()->email);
+        $this->assertDatabaseMissing('users', ['email' => 'viejo@est.univalle.edu']);
+        $this->post(route('login.entrar'), ['email' => 'admi7@est.univalle.edu', 'password' => 'Admi1234@']);
+        $this->assertAuthenticatedAs($this->admin());
     }
 }

@@ -28,6 +28,7 @@
         <div class="kpi"><div class="num">{{ $porEstado['en_preparacion'] ?? 0 }}</div><div class="rotulo">En preparación</div></div>
         <div class="kpi"><div class="num">{{ $porEstado['listo'] ?? 0 }}</div><div class="rotulo">Listos para entregar</div></div>
         <div class="kpi {{ $reembolsos ? 'alerta-kpi' : '' }}"><div class="num">{{ $reembolsos }}</div><div class="rotulo">Reembolsos pendientes</div></div>
+        <a class="kpi {{ $correosFallidos ? 'alerta-kpi' : '' }}" href="{{ route('admin.correos', $correosFallidos ? ['estado' => 'fallido'] : []) }}" style="text-decoration:none;color:inherit"><div class="num">{{ $correosFallidos }}</div><div class="rotulo">Correos que no se enviaron (7 días)</div></a>
     </div>
 
     <div class="columnas">
@@ -40,6 +41,7 @@
                 <a class="btn contorno" href="{{ route('admin.pedidos') }}">Todos los pedidos</a>
                 <a class="btn contorno" href="{{ route('admin.facturas') }}">Facturas</a>
                 <a class="btn contorno" href="{{ route('admin.usuarios') }}">Usuarios</a>
+                <a class="btn contorno" href="{{ route('admin.correos') }}">Correos</a>
             </div>
         </section>
 

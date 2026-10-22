@@ -7,16 +7,27 @@ ROLES
   (poner "En preparacion" con minutos, "Listo", "Entregado", cancelar).
 - Administrador: se crea por codigo (seeder). Hace todo lo del empleado + crear/eliminar empleados,
   ver todos los pedidos, facturas y usuarios.
-  Usuario inicial:  bmj2031702@est.univalle.edu   Clave: Admin12345   (cambiala en Mi perfil)
-  (se cambia en .env: ADMIN_EMAIL / ADMIN_PASSWORD y luego php artisan db:seed --class=AdminSeeder)
+  Usuario:  admi7@est.univalle.edu   Clave: Admi1234@
+  (se crea/actualiza solo con "php artisan migrate"; si ya habia otro admin, se cambia ese mismo)
 
 CORREOS AL CLIENTE (obligatorios en el flujo)
+- Bienvenida al registrarse (con boton para confirmar que el correo es suyo)
+- Recuperar contrasena (con el diseno de CafeQR)
 - Codigo de verificacion del pago (6 digitos)
 - Pago confirmado (con codigo de recojo y factura)
 - Pedido EN PREPARACION  (con el tiempo estimado en minutos)
 - Pedido LISTO para recoger
 - Pedido cancelado
 Ademas el cliente ve el tiempo restante en la pantalla de seguimiento (se actualiza sola).
+
+SI UN CORREO NO LLEGA
+- Panel del administrador -> "Correos": cada correo con su estado (Enviado / Fallo / Modo prueba),
+  el motivo del fallo en palabras simples y un boton "Reenviar".
+- Si dice "Enviado": Gmail lo acepto -> que el cliente revise Spam / Promociones y que su correo exista.
+- Si dice "Fallo": el motivo dice si es la contrasena de Gmail, el internet o el correo de destino.
+- Si Gmail falla, el sistema reintenta solo una vez y la pagina NUNCA se rompe.
+- El cliente ve en Mi perfil si su correo esta "Confirmado" y puede pedir que se le reenvie.
+- MAIL_FROM_ADDRESS debe ser el MISMO Gmail que MAIL_USERNAME.
 
 >>> IMPORTANTE: para que los correos lleguen DE VERDAD en .env debe decir MAIL_MAILER=smtp
     (con MAIL_MAILER=log solo se escriben en storage/logs/laravel.log y la pagina te avisa).
@@ -31,13 +42,8 @@ CONFIGURAR GMAIL (.env)
   Luego:  php artisan config:clear
   Prueba: php artisan correo:probar tucorreo@gmail.com
 
-INSTALAR SOBRE TU PROYECTO ACTUAL
-1) Descomprime este ZIP en una carpeta (ej. C:\cafeqr-nuevo).
-2) Abre PowerShell DENTRO de tu proyecto viejo y ejecuta:
-     powershell -ExecutionPolicy Bypass -File "C:\cafeqr-nuevo\aplicar-cambios.ps1"
-   Hace backup, copia todo, NO toca tu .env, instala el QR (composer), reinicia la base de datos
-   con el admin y el menu, y corre las pruebas.
-3) Inicia con:  .\iniciar-cafeqr.bat
+INSTALAR / ACTUALIZAR
+  Ver ACTUALIZAR.txt (no borra tus usuarios, pedidos ni tu .env).
 
 QR DE PAGO - COMO FUNCIONA (PAGO_MODO=demo)
 - El QR contiene el enlace http://IP-DE-TU-PC:8000/pagar/XXXX. El celular debe estar en el MISMO WiFi.
@@ -50,7 +56,7 @@ PAGO_MODO=banco: pon tu QR real en public\img\qr-cobro.png; el cliente toca "Ya 
 lo confirma en Caja.
 
 PRUEBAS
-  php artisan test      (25 pruebas: registro, roles, QR, efectivo, correos, cancelacion, productos)
+  php artisan test      (38 pruebas: registro, correos, roles, QR, efectivo, cupones, cancelacion, productos)
 
 SEGURIDAD
 - NO subas ni compartas el archivo .env (tiene la contrasena de Gmail). Este ZIP no lo incluye.

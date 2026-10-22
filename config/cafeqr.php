@@ -26,10 +26,13 @@ return [
         'direccion' => env('EMISOR_DIRECCION', 'Universidad Privada del Valle, La Paz - Bolivia'),
     ],
 
-    /* Administrador que se crea con: php artisan db:seed */
+    /*
+     * Administrador (se crea/actualiza con php artisan migrate o php artisan db:seed --class=AdminSeeder).
+     * Usa nombres nuevos de variables para que un ADMIN_EMAIL viejo del .env no lo cambie.
+     */
     'admin' => [
-        'nombre' => env('ADMIN_NOMBRE', 'Administrador CafeQR'),
-        'email' => env('ADMIN_EMAIL', 'bmj2031702@est.univalle.edu'),
-        'password' => env('ADMIN_PASSWORD', 'Admin12345'),
+        'nombre' => env('CAFEQR_ADMIN_NOMBRE', 'Administrador'),
+        'email' => env('CAFEQR_ADMIN_EMAIL', 'admi7@est.univalle.edu'),
+        'password' => env('CAFEQR_ADMIN_PASSWORD', 'Admi1234@'),
     ],
 ];

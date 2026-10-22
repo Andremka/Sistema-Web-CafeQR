@@ -17,6 +17,12 @@
                 <td align="right" style="padding:6px 0;border-bottom:1px solid #eee3e5;">Bs {{ number_format($detalle->subtotal, 2) }}</td>
             </tr>
         @endforeach
+        @if ($pedido->descuento > 0)
+            <tr>
+                <td style="padding:6px 0;color:#6e5a5f;">Cupón {{ $pedido->cupon }}</td>
+                <td align="right" style="padding:6px 0;color:#6e5a5f;">−Bs {{ number_format($pedido->descuento, 2) }}</td>
+            </tr>
+        @endif
         <tr>
             <td style="padding:10px 0;"><strong>Total</strong></td>
             <td align="right" style="padding:10px 0;"><strong>Bs {{ number_format($pedido->total, 2) }}</strong></td>

@@ -14,7 +14,20 @@
                 @include('partials.avatar', ['user' => $usuario, 'tam' => 96])
             </div>
 
-            <p><strong>Correo:</strong> {{ $usuario->email }}</p>
+            <p><strong>Correo:</strong> {{ $usuario->email }}
+                @if ($usuario->email_verified_at)
+                    <span class="etiqueta disponible">Confirmado</span>
+                @else
+                    <span class="etiqueta agotado">Sin confirmar</span>
+                @endif
+            </p>
+            @unless ($usuario->email_verified_at)
+                <form method="POST" action="{{ route('perfil.verificacion') }}" style="margin:0 0 14px">
+                    @csrf
+                    <p class="ayuda" style="margin:0 0 8px">Confirma tu correo para asegurarte de recibir tus códigos de pago y los avisos de tus pedidos.</p>
+                    <button type="submit" class="btn contorno">Reenviar correo de confirmación</button>
+                </form>
+            @endunless
             <p><strong>Tipo de usuario:</strong> <span class="etiqueta rol-{{ $usuario->rol }}">{{ $usuario->rol_texto }}</span></p>
             <p><strong>Miembro desde:</strong> {{ $usuario->created_at->format('d/m/Y') }}</p>
             @if ($usuario->esCliente())
